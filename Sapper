@@ -1,0 +1,102 @@
+from tkinter import *
+import random
+
+n = 10
+area = [0] * n
+smokeOfWar = [0] * n
+
+for i in range(n):
+  area[i] = [0] * n
+  smokeOfWar[i] = [0] * n
+def pshu(y,x):
+  if y>=0 and y<=n-1 and x>=0 and x<=n-1:
+    if smokeOfWar[y][x] == 0:
+      smokeOfWar[y][x] = 1
+      if area[y][x]==0:
+        pshu(y+1,x)
+        pshu(y+1,x+1)
+        pshu(y+1,x-1)
+        
+        pshu(y-1,x)
+        pshu(y-1,x+1)
+        pshu(y-1,x-1)
+  
+        pshu(y,x+1)
+        pshu(y,x-1)
+  
+def drawUI():
+  p = 500//n
+  for i in range(n):
+    canva.create_line(0,i*p, 500, i*p)
+    canva.create_line(i*p, 0, i*p, 500)
+  for i in range(n):
+    for j in range(n):
+      if smokeOfWar[i][j] == 1:
+        if area[i][j] > 0:
+          canva.create_rectangle(j*p,i*p,j*p+p,i*p+p, fill='bisque')
+          canva.create_text(j*p+25,i*p+25,text=str(area[i][j]), font=('Helvettica 15 bold'), fill='midnight blue')
+        if area[i][j] >= 10:
+          canva.create_oval(j*p+5,i*p+5,j*p+p-5,i*p+p-5, fill='gray2')
+          canva.create_text(250,250, text='YOU LOSE!!!', font=('Helvettica 50 bold'), fill='black')
+          window.destroy()
+        if area[i][j] == 0:
+          canva.create_rectangle(j*p,i*p,j*p+p,i*p+p, fill='tan1')
+        
+def GenerateArea():
+  mines = n
+  while mines > 0:
+    x = random.randint(0,n-1)
+    y = random.randint(0,n-1)
+    if area[x][y] < 10:
+      area[x][y] = 10
+      mines -= 1
+      if x > 0:
+        area[x-1][y]+=1
+      if x > 0 and y < n-1:
+        area[x-1][y+1]+=1
+      if x > 0 and y > 0:
+        area[x-1][y-1]+=1
+        
+      if x < n - 1:
+        area[x+1][y]+=1
+      if x < n - 1 and y > 0:
+        area[x+1][y-1]+=1
+      if x < n - 1 and y < n - 1:
+        area[x+1][y+1]+=1
+        
+      if y > 0:
+        area[x][y-1]+=1
+      if y < n - 1:
+        area[x][y+1]+=1
+  for i in range(n):
+    print(area[i])
+    
+def mouseClick(mouse):
+  print(mouse.x, mouse.y)
+  p = 500//n
+  x = mouse.x//p
+  y = mouse.y//p
+  if area[x][y] == 0:
+      pshu(y,x)
+  smokeOfWar[y][x]=1
+  drawUI()
+  s = 0
+  for i in range(n):
+    s += sum(smokeOfWar[i])
+  if s == 90:
+    canva.create_text(250,250, text='YOU WIN!!!', font=('Helvettica 50 bold'), fill='black')
+      
+
+# def loser():
+#   if smokeOfWar >= 10:
+    # canva.create_oval()
+
+GenerateArea()
+window = Tk()
+window.geometry('500x500')
+canva = Canvas(window, height = 500, width = 500, bg = 'azure')
+canva.bind('<Button-1>', mouseClick)
+canva.pack()
+drawUI()
+
+window.mainloop()
